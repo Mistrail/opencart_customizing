@@ -1,0 +1,186 @@
+/*** buyer check ***/
+#report.buyer-check {
+	width: 210mm;
+	height: 148mm;
+}
+#report.buyer-check #order_info {
+	max-height: 50%;
+}
+#report.buyer-check #products_info {
+	min-height: 50%;
+}
+#report.buyer-check #company_header {
+    height: 70px;
+	text-align: center;
+}
+#report.buyer-check #company_header img {
+	height: 100%;
+	width: auto;
+}
+#report.buyer-check #order_info {
+	padding: 0 7%;
+}
+#report.buyer-check #company_info {
+	text-align: center;
+}
+#report.buyer-check #order_info table {
+	width: 100%;
+	margin-bottom: 5%;
+}
+#report.buyer-check #order_info table td {
+	font-size: 120%;
+}
+#report.buyer-check #phones {
+	width: 30%;
+	float: left;
+	line-height: 150%;
+}
+#report.buyer-check #address {
+	float: left;
+	line-height: 150%;
+}
+#report.buyer-check #company_info, #customer_info {
+	margin: 2% 0;
+	overflow: hidden;
+}
+#report.buyer-check #check_num {
+	text-align: center;
+	border: 1px solid;
+	padding: 3px;
+	border-left: 0;
+	border-right: 0;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+#report.buyer-check #products {
+	width: 100%;
+	border-collapse: collapse;
+}
+#report.buyer-check #products td, #report.buyer-check #products th {
+	padding: 3px;
+	font-size: 120%;
+}
+#report.buyer-check #products tfoot {
+	font-weight: bold;
+}
+/*** cash voucher ***/
+#report.cash-voucher {
+	width: 80mm;
+}
+#report.cash-voucher > div {
+	padding: 5px;
+}
+#report.cash-voucher #top {
+	text-transform: uppercase;
+	width: 100%;
+}
+#report.cash-voucher #top td {
+	font-size: 200%;
+	font-weight: bold;
+}
+#report.cash-voucher #company_info {
+    border: 1px dotted #999999;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 15px 5px;
+    padding: 10px;
+    text-align: center;
+}
+#report.cash-voucher #products_container {
+	border: 2px solid #000;
+}
+#report.cash-voucher #products_container  table{
+	width: 100%;
+}
+#report.cash-voucher #products_container  table td {
+	padding: 3px;
+	font-size: 120%;
+}
+#report.cash-voucher #total {
+	font-weight: bold;
+	margin-top: 30px;
+	margin-bottom: 20px;
+	line-height: 150%;
+}
+
+/*** x-report ***/
+#report.x-report {
+	width: 80mm;
+}
+#report.x-report, #report.x-report table td {
+	font-size: 120%;
+	font-weight: bold;
+}
+#report.x-report > div {
+	padding: 5px;
+}
+#report.x-report div {
+	margin: 15px 0;
+}
+#report.x-report #company_info {
+    border: 1px dashed #000000;
+    font-size: 120%;
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+}
+
+/*** z-report ***/
+#report.z-report {
+	width: 180mm;
+	font-size: 120% !important;
+}
+#report.z-report > div {
+	padding: 5px;
+}
+#report.z-report #company_info {
+    border: 1px dotted #999999;
+    border-radius: 8px;
+    font-weight: bold;
+    margin: 15px 5px;
+    padding: 10px;
+    text-align: center;
+}
+#report.z-report #products_container  table{
+	width: 100%;
+}
+#report.z-report #products_container  table td {
+	padding: 1px;
+	text-align: center;
+	font-size: 15px;
+}
+#report.z-report #products_container  table tbody tr td:first-child {
+	text-align: left;
+}
+#report.z-report #total {
+	font-weight: bold;
+	margin-top: 30px;
+	margin-bottom: 20px;
+	line-height: 150%;
+}
+#report.z-report #total table {
+	width: 100%;
+}
+#report.z-report #products_container {
+    border: 1px solid #000000;
+	border-left: 0;
+	border-right: 0;
+    margin: 10px 0;
+	padding: 5px 0;
+}
+#report.z-report #bottom {
+	margin-top: 50px;
+}
+#report.z-report #bottom table {
+	width: 100%;
+}
+#report.z-report #bottom table td{
+
+}
+#report.z-report .field {
+	border-bottom: 1px solid #000;
+	width: 100%;
+}
+#report.z-report #products_container table th {
+	font-size: 80%;
+}
