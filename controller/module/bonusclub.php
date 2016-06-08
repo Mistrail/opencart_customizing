@@ -4,9 +4,12 @@ class ControllerModuleBonusclub extends Controller {
 
     private $error = array();
 
-    public function index() {
-        $this->document->setTitle("Настройки Bonusclub API");
+    public function __construct($registry) {
+        parent::__construct($registry);
         $this->load->language('module/bonusclub');
+        $this->document->addStyle("view/template/bonusclub/css/style.css");
+        $this->document->addScript("view/template/bonusclub/js/script.js");
+
         $this->data['breadcrumbs'] = array();
 
         $this->data['breadcrumbs'][] = array(
@@ -23,17 +26,29 @@ class ControllerModuleBonusclub extends Controller {
 
         $this->data['breadcrumbs'][] = array(
             'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('module/account', 'token=' . $this->session->data['token'], 'SSL'),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
             'separator' => ' :: '
         );
+
 
         $this->children = array(
             "common/header",
             "common/footer",
         );
+    }
+
+    public function index() {
+        $this->document->setTitle("Настройки Bonusclub API");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
 
         $this->template = "bonusclub/index.tpl";
-        $this->response->setOutput($this->render());
+
         $this->load->model("setting/setting");
 
         if (filter_input(INPUT_POST, "action") == "saveConfig") {
@@ -56,6 +71,71 @@ class ControllerModuleBonusclub extends Controller {
             $this->data["settings"]["url"] = "";
         }
 
+        $this->response->setOutput($this->render());
+    }
+
+    public function emulate() {
+        $this->document->setTitle("Эмуляция");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
+        $this->template = "bonusclub/emulate.tpl";
+        $this->response->setOutput($this->render());
+    }
+
+    public function api() {
+        $this->document->setTitle("Методы API");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
+        $this->template = "bonusclub/api.tpl";
+        $this->response->setOutput($this->render());
+    }
+
+    public function itemlist() {
+        $this->document->setTitle("Баллы для товаров");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
+        $this->template = "bonusclub/" . __FUNCTION__ . ".tpl";
+        $this->response->setOutput($this->render());
+    }
+
+    public function c_trigger() {
+        $this->document->setTitle("Триггеры баллов корзины");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
+        $this->template = "bonusclub/" . __FUNCTION__ . ".tpl";
+        $this->response->setOutput($this->render());
+    }
+
+    public function o_trigger() {
+        $this->document->setTitle("Триггеры баллов заказа");
+
+        $this->data['breadcrumbs'][] = array(
+            'text' => $this->document->getTitle(),
+            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'separator' => ' :: '
+        );
+
+        $this->template = "bonusclub/" . __FUNCTION__ . ".tpl";
         $this->response->setOutput($this->render());
     }
 

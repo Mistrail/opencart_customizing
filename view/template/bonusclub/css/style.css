@@ -1,0 +1,34 @@
+    code{
+        color: #06f;
+        font-weight: bold;
+    }
+    .alert-warning{
+        color: #fa0;
+        font-weight: bold;
+    }
+    .alert-success{
+        color: #090;
+        font-weight: bold;
+    }
+    .alert-error{
+        color: #a00;   
+        font-weight: bold;
+    }
+    .checking{
+        padding: 1em;
+    }
+    
+    table.emulator{
+        width: 90%
+    }
+    table.emulator td{
+        vertical-align: bottom;
+    }
+    
+    .testrequest{
+        background: #ccc;
+        padding: 1em;
+    }
+    .htabs a{
+        display: inline-block;
+    }

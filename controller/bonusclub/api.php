@@ -19,16 +19,20 @@ class ControllerBonusclubApi extends Controller {
     }
 
     public function check() {
-        $resp = $this->send("check", "emulate", "");
+        $resp = $this->send("check", "emulate");
         $this->response->setOutput($resp);
     }
 
     public function GetToken() {
-        
+        $this->data["token"] = $this->send("getToken");
     }
 
-    public function getaccount($filter) {
+    public function getaccount($filter = array()) {
+        $filter  = $filter ? $filter : array($_POST["field"] => $_POST["value"]);
+        $this->GetToken();
+        $resp = $this->send("getAccount",$this->data["token"], $filter);
         
+        $this->response->setOutput(json_encode($resp));
     }
 
     public function fill($id, $summ) {
@@ -86,7 +90,7 @@ class ControllerBonusclubApi extends Controller {
         return $heading . $body . $footing;
     }
 
-    private function send($action, $token, $data) {
+    private function send($action, $token = "", $data = "") {
         $resp = false;
         $post = array();
         if (!empty($data)) {
@@ -113,7 +117,9 @@ class ControllerBonusclubApi extends Controller {
 
         $output = json_decode($resp, true);
         curl_close($ch);
-        
+        if (!$output) {
+            return $this->send($action, $token, $data);
+        }
         return $output["response"];
     }
 

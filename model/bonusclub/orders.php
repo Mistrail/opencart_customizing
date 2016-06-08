@@ -13,12 +13,5 @@
  */
 class ModelBonusclubOrders extends Model{
     
-    public function index($phone) {
-        
-    }
-    
-    public function account($phone) {
-        return $phone;
-    }
     
 }
