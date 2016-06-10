@@ -1,6 +1,14 @@
 <?php
 //die ("???? ???????");
 // Version
+if(!function_exists("d")){
+    function d(){
+        $args = func_get_args();
+        foreach($args as $arg){
+            print "<pre>" . print_r($arg, true) . "</pre>";
+        }
+    }
+}
 date_default_timezone_set('Europe/Kaliningrad');
 define('VERSION', '1.5.3.1');
 

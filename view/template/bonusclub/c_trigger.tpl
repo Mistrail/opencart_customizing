@@ -1,6 +1,8 @@
 <?=
 
-$header; ?>
+$header; 
+d($_POST);
+?>
 <div id="content">
     <div class="breadcrumb">
         <?php foreach ($breadcrumbs as $breadcrumb) { ?>
@@ -18,7 +20,9 @@ $header; ?>
     <div class="box">
         <div class="heading"><h1><img src="view/image/module.png" alt> <?=$this->document->getTitle()?></h1></div>
         <div class="content auto-height">
-            CONTENT
+            <form method="post" id="cTrigger">
+                
+            </form>
         </div>
     </div>
 </div>

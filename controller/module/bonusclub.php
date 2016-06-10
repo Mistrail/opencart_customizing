@@ -37,6 +37,14 @@ class ControllerModuleBonusclub extends Controller {
         );
     }
 
+    public function ctriggerform() {
+        $this->load->model("bonusclub/triggers");
+        $action = empty($this->request->post["action"]) ? "getCase" : $this->request->post["action"];
+        $cond = $this->model_bonusclub_triggers->getTriggerHTML($action, $this->request->post);
+        
+        $this->response->setOutput($cond);
+    }
+    
     public function index() {
         $this->document->setTitle("Настройки Bonusclub API");
 
@@ -92,12 +100,39 @@ class ControllerModuleBonusclub extends Controller {
 
         $this->data['breadcrumbs'][] = array(
             'text' => $this->document->getTitle(),
-            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'href' => $this->url->link('module/bonusclub/api', 'token=' . $this->session->data['token'], 'SSL'),
             'separator' => ' :: '
         );
 
         $this->template = "bonusclub/api.tpl";
         $this->response->setOutput($this->render());
+    }
+
+    private function getItemList($cid) {
+        $data = array();
+        $return = array();
+        $this->load->model("catalog/product");
+        $this->load->model("bonusclub/bonuspoints");
+        $data = $this->model_catalog_product->getProductsByCategoryId($cid);
+        
+        foreach($data as $item){
+            $return[] = array(
+                "name" => $item["name"],
+                "product_id" => $item["product_id"],
+                "price" => $item["price"],
+                "currency" => $this->currency->getCode(),
+                "bonus_points" => $this->model_bonusclub_bonuspoints->get($item["product_id"]),
+            );
+        }
+        
+        return $return;
+    }
+
+    private function getCategoryList() {
+        $data = array();
+        $this->load->model("catalog/category");
+        $data = $this->model_catalog_category->getCategories();
+        return $data;
     }
 
     public function itemlist() {
@@ -109,6 +144,20 @@ class ControllerModuleBonusclub extends Controller {
             'separator' => ' :: '
         );
 
+        if(!empty($this->request->post["action"]) && $this->request->post["action"] == "batchUpdateBonuspoints"){
+            $this->load->model("bonusclub/bonuspoints");
+            $result = $this->model_bonusclub_bonuspoints->update($this->request->post["bonus_points"]);
+        }
+        
+        
+        $this->data["products"] = array();
+
+        if(!empty($this->request->get["category_id"])){
+            $this->data["products"] = $this->getItemList($this->request->get["category_id"]);
+        }
+        
+        $this->data["categories"] = $this->getCategoryList();
+        
         $this->template = "bonusclub/" . __FUNCTION__ . ".tpl";
         $this->response->setOutput($this->render());
     }
@@ -118,7 +167,7 @@ class ControllerModuleBonusclub extends Controller {
 
         $this->data['breadcrumbs'][] = array(
             'text' => $this->document->getTitle(),
-            'href' => $this->url->link('module/bonusclub/emulate', 'token=' . $this->session->data['token'], 'SSL'),
+            'href' => $this->url->link('module/bonusclub/itemlist', 'token=' . $this->session->data['token'], 'SSL'),
             'separator' => ' :: '
         );
 
