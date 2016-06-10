@@ -61,6 +61,7 @@ class ControllerExtraOrder extends Controller {
 
 			$orders[$result['status_id']][] = array(
 				'order_id'        => $result['order_id'],
+				'date_add'        => $result['date_add'],
 				'number'          => $result['number'],
 				'customer_name'   => $customer['name'],
 				'preorder'        => $result['preorder'],

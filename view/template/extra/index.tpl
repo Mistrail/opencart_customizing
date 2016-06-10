@@ -1,6 +1,9 @@
 <?php
 
-echo $header; ?>
+echo $header;
+
+?>
+
 <div id="content">
   <?php if ($success) { ?>
     <div class="success"><?php echo $success; ?></div>
@@ -18,6 +21,7 @@ echo $header; ?>
                     <tr>
                         <td class="left">Имя покупателя</td>
                         <td class="right">Сумма заказа</td>
+                        <td class="right">Дата поступления</td>
                         <td class="right">Телефон</td>
                         <td class="right">Действия</td>
                     </tr>
@@ -46,6 +50,7 @@ echo $header; ?>
                 <?php $sum = $order['total_special'] + $order['total_diff']; ?>
                 <?php echo ($sum > FREE_DELIVERY_TOTAL) ? $sum : $sum + $order['delivery_price']; ?>
                         </td>
+                        <td><?=date("d.m.Y H:i", strtotime($order["date_add"]));?></td>
                         <td class="right"><?php echo $order['customer_phone']; ?>
                           <!--<a onClick="copyToClipboard('<?php echo $order['customer_phone']; ?>')" class="dotted">[ <span>копировать </span>]</a>-->
                         </td>
