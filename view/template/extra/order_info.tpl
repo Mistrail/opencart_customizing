@@ -17,6 +17,7 @@
                     <?php } ?>
                 </select>
             </td>
+            <td>Начислено бонусов</td>
             <td>Цена со скидкой</td>
             <td>Сумма</td>
             <td></td>
@@ -54,6 +55,7 @@
                         <?php } ?>
                     </select>
                 </td>
+                <td>BONUSPOINTS</td>
                 <td class="eo-product-special"><?php echo $product['special']; ?></td>
                 <td class="eo-product-total"><?php echo $product['total']; ?></td>
                 <td><a onClick="removeFromCart(<?php echo $product['product_id']; ?>)">x</a></td>
@@ -297,7 +299,7 @@
 
 <style type="text/css">
     .newcard{
-        display: none;
+        display: block;
         position: relative; 
         background: rgba(0,0,0,0.1);
         border-radius: 4px;
@@ -350,39 +352,7 @@
     }
 </style>
 
-<?
-$phone = filter_input(INPUT_GET, "phone");
-$BCCLI = new BCClient();
-
-/**
- * BONUSDATA MODEL
- */
-$bonusdata = array(
-    "id" => "",
-    "account" => "",
-    "email" => "",
-    "name" => "",
-    "zipcode" => "",
-    "phone" => "",
-    "country_id" => "",
-    "city_id" => "",
-    "address" => "",
-    "group_id" => "",
-    "balance" => "",
-    "status" => "",
-    "date_create" => "",
-    "date_update" => "",
-    "comments" => "",
-);
-
-if ($phone) {
-    $customer["phone"] = $phone;
-    $bonusdata = $BCCLI->Card("phone", $phone);
-    $customer["name"] = $customer["name"] ? $customer["name"] : $bonusdata["name"];
-}
-?>
-
-<div class="newcard" style="display: <? if (filter_input(INPUT_GET, "autologin") === "callcenter" && $phone == "9118537958"): ?>block<? endif; ?>">
+<div class="newcard" id="clientcard" style="display: <? if (filter_input(INPUT_GET, "autologin") === "callcenter" && $phone == "9118537958"): ?>block<? endif; ?>">
     <h2>Ноавя карта клиента (разработка) BETA</h2>
     <div class="row">
         <div class="col">
@@ -394,7 +364,7 @@ if ($phone) {
                 <label>Телефон АОН *:</label><input type="text" name="customer[phone]" value="<?= $customer["phone"] ?>">
             </div>
             <div class="plate">
-                <label>Телефон 2:</label><input type="text" name="customer[value]" value="<?= $customer["phone2"] ?>">
+                <label>Телефон 2:</label><input type="text" name="customer[phone2]" value="<?= $customer["phone2"] ?>">
             </div>
         </div>
 
@@ -413,7 +383,7 @@ if ($phone) {
                 <label>Квартира / Офис:</label><input name="customer[flat]" type="text" value="<?= $customer["flat"] ?>">
             </div>
             <div class="plate">
-                <label>Этаж:</label><input type="text" name="customer[floor]" value="<?= $order["floor"] ?>">
+                <label>Этаж:</label><input type="text" name="order[floor]" value="<?= $order["floor"] ?>">
             </div>
             <div class="plate">
                 <div class="plate">
@@ -423,12 +393,11 @@ if ($phone) {
                     <?
                     $disance = empty($order['distance']) ? (empty($customer['distance']) ? "" : $customer['distance']) : $order['distance'];
                     ?>
-                    <label>Расстояние:</label>
-                        <input id="new_customer_distance" readonly="readonly" placeholder="не определено" type="text" value="">
+                    <label>Расстояние:</label><input id="customer_distance" readonly="readonly" placeholder="не определено" type="text" value="">
                         <input name="customer[distance]" type="hidden" value="<?= $disance; ?>">
                 </div>
                 <div class="plate">
-                    <label>Цена доставки:</label><input id="new_delivery_price" readonly="readonly" placeholder="не определена" type="text" value="">
+                    <label>Цена доставки:</label><input id="delivery_price" readonly="readonly" placeholder="не определена" type="text" value="">
                 </div>
             </div>
         </div>
@@ -438,98 +407,37 @@ if ($phone) {
 
             <div class="plate">    
                 <div class="plate">
-                    <label>Телефон:</label><input type="text" value="<?= $phone ?>">
+                    <label>Телефон:</label><input type="text" name="bonus_phone" value="<?= $customer["phone"] ?>">
                 </div>
                 <div class="plate">
-                    <label>Номер карты:</label><input type="text" value="<?= $bonusdata["account"] ?>">
+                    <label>Номер карты:</label><input type="text" name="bonus_account" value="" placeholder="не найден">
                 </div>
                 <div class="plate">
-                    <label>Баланс:</label><input readonly="readonly" name='bonusdata[balance]' type="text" value="<?= $bonusdata["balance"] ?>">
+                    <label>Баланс:</label><input readonly="readonly" name='bonus_balance' type="text" value="0">
                 </div>
                 <div class="plate">
-                    <button type="button">Поиск (отключен)</button>
+                    <button type="button" id="bonus_search">Поиск</button>
                 </div>
             </div>
             <div class="plate">
                 <h4>Начисление / Списание</h4>
 
                 <div class="plate">
-                    <label>Списать:</label><input name="bonusdata[withdraw]" type="text" value="0">
+                    <label>Списать:</label><input name="bonus_withdraw" type="text" value="0">
                 </div>
                 <div class="plate">
-                    <label>Начислить:</label><input readonly="readonly" name="bonusdata[fill]" type="text" value="0">
+                    <label>Начислить:</label><input readonly="readonly" name="bonus_fill" type="text" value="0">
                 </div>
-                <input type="hidden" name="bonusdata[delta]" val="0">
+                <input type="hidden" name="bonus_delta" val="0">
             </div>
         </div>
     </div>
     <div class="submitters">
         <?php if (isset($this->request->get['save'])) { ?>
-            <a class="btn" id="xbutton_save_order">Сохранить заказ (НЕ НАЖИМАТЬ!)</a>
+            <a class="btn" id="button_save_order">Сохранить заказ</a>
         <?php } ?>
-        <a class="btn" id="xbutton_confirm_order">Подтвердить заказ (НЕ НАЖИМАТЬ!)</a>
+        <a class="btn" id="button_confirm_order">Подтвердить заказ</a>
     </div>
 </div>
 
 <!-- NEW CARD . END ======================================================== -->
-
-<div id="extra_customer_info">
-    <h3>Карточка клиента</h3>
-    <div class="column-left">
-        <div class="row">
-            <label>Имя:<span class="required">*</span></label>
-            <input type="text" name="customer[name]" value="<?php echo $customer['name']; ?>">
-        </div>
-        <div class="row">
-            <label>Телефон АОН:<span class="required">*</span></label>
-            <input type="text" id="customerphone" name="customer[phone]" value="<?php echo $customer['phone']; ?>">
-        </div>
-        <div class="row">
-            <label>Телефон 2:</label>
-            <input type="text" name="customer[phone2]" value="<?php echo $customer['phone2']; ?>">
-        </div>
-    </div>
-    <div class="column-right delivery-info">
-        <div id="delivery_info">
-            <?php if (isset($order['distance']) && $order['distance'] > 0) { ?>
-                <input type="hidden" name="customer[distance]" value="<?php echo $order['distance']; ?>">
-            <?php } elseif (isset($customer['distance']) && $customer['distance'] > 0) { ?>
-                <input type="hidden" name="customer[distance]" value="<?php echo $customer['distance']; ?>">
-            <?php } else { ?>
-                <input type="hidden" name="customer[distance]" value="0">
-            <?php } ?>
-            расстояние
-            <div id="distance">—</div>
-            цена доставки
-            <div id="delivery_price">—</div>
-            <div class="buttons">
-                <a class="refresh button" id="button_get_distance"><span></span></a>
-            </div>
-        </div>
-        <div class="row">
-            <label>Город:</label>
-            <input type="text" name="customer[city]" value="<?php echo $customer['city']; ?>">
-        </div>
-        <div class="row">
-            <label>Улица:</label>
-            <input id="delivery_street" type="text" name="customer[street]" value="<?php echo $customer['street']; ?>">
-        </div>
-        <div class="row">
-            <label>Дом:</label>
-            <input type="text" name="customer[house]" value="<?php echo $customer['house']; ?>">
-            Кв.\офис:
-            <input type="text" name="customer[flat]" value="<?php echo $customer['flat']; ?>">
-        </div>
-        <div class="row">
-            <label>Этаж:</label>
-            <input type="text" name="order[floor]" value="<?php echo $order['floor']; ?>">
-        </div><br/>
-    </div>
-</div>
-<div id="order_buttons" class="buttons">
-  <!--<a class="button" href="<?php echo $href_cancel; ?>">Отменить</a>-->
-    <?php if (isset($this->request->get['save'])) { ?>
-        <a class="button" id="button_save_order">Сохранить</a>
-    <?php } ?>
-    <a class="button" id="button_confirm_order">Подтвердить заказ</a>
-</div>

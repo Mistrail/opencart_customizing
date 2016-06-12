@@ -59,7 +59,7 @@
 <script type="text/javascript">
     function getDeliveryPrice() {
         var m = parseFloat($('#delivery_info input[name="customer[distance]"]').val());
-            //m *= 1000;
+        //m *= 1000;
         if (m < 6000) {
             return 100;
         } else if (m < 10300) {
@@ -83,12 +83,29 @@
         total = 0;
         total_special = 0;
 
+        var fieldWithdraw = "";
+        var inputWithdraw = $("[name=bonus_withdraw]");
+        var inputFill = $("[name=bonus_fill]");
+
+        var fill = 0;
+        var withdraw = 0;
+        var deltaTotal = 0;
+
         $('#extra_order_cart tbody tr').each(function () {
             global_special_percent = parseInt($('#extra_order_cart thead select[name="customer[total_special]"]').val());
+            var bonusField = $(this).find(".eo-product-bonuspoints");
+            var bonusFilled = 0;
+            var delta = 0;
 
             price = $(this).find('.eo-input-product-price').val();
             quantity = $(this).find('.quantity input').val();
             special_percent = parseInt($(this).find('.eo-product-special_percent option:selected').val());
+
+            bonusFilled = price * quantity * (special_percent ? 0.01 : 0.02);
+            delta = bonusFilled - Math.floor(bonusFilled);
+            bonusField.html(Math.floor(bonusFilled));
+            deltaTotal += delta;
+            fill += Math.floor(bonusFilled);
 
             if (special_percent < global_special_percent) {
                 $(this).find('.eo-product-special_percent select').val(global_special_percent);
@@ -115,7 +132,7 @@
         var biglion = $('#extra_order_info input[name="order[biglion]"]:checked').val();
         var delivery_method = parseInt($('#extra_order_info input[name="order[delivery_id]"]:checked').val());
         var free_delivery_methods = [<?php echo implode(',', $free_delivery_ids); ?>];
-        var m = parseInt($('#delivery_info input[name="customer[distance]"]').val());
+        var m = parseInt($('#clientcard input[name="customer[distance]"]').val());
 
         if ((!delivery_method || $.inArray(delivery_method, free_delivery_methods) < 0) && (m > <?php echo FREE_DELIVERY_DISTANCE; ?> || biglion || (total_special > 0 && total_special < <?php echo FREE_DELIVERY_TOTAL; ?>))) {
             var delivery_price = getDeliveryPrice();
@@ -124,17 +141,7 @@
         }
 
 
-
         if (total > 0) {
-            var fill = 0;
-            var withdraw = $('[name="bonusdata[withdraw]"]').val();
-            var fullFill = total * 0.05;
-            fill = Math.floor(fullFill);
-
-            total_special = total_special - withdraw;
-            $("[name='bonusdata[fill]']").val(fill);
-            $("[name='bonusdata[delta]']").val(fullFill - fill);
-
             special_percent = ((total - total_special) / (total / 100)).toFixed(1);
         } else {
             special_percent = 0;
@@ -146,7 +153,10 @@
         order_info.find('.eo-order-special_percent').html(special_percent);
         order_info.find('.eo-order-delivery').html(delivery_price);
         order_info.find('.eo-order-total').html(total_special + delivery_price);
+
+        inputFill.val(fill);
     }
+
 
     function getSpecialsHtml(product_id, selected) {
         var html = '';
@@ -203,6 +213,9 @@
             selected = $('#extra_order_info select[name="customer[total_special]"]').val();
             html += getSpecialsHtml(product_id, selected);
 
+            var points = 0;
+            html += ' <td class="eo-product-bonuspoints">' + Math.floor(points) + '</td>';
+
             html += ' </td>';
             html += ' <td class="eo-product-special">0</td>';
             html += ' <td class="eo-product-total">0</td>';
@@ -223,6 +236,7 @@
     $(function () {
         $('#content').on('change', 'select[name="customer[total_special]"]', function () {
             val = $(this).val()
+
 
             $('#content').find('select[name="customer[total_special]"]').val(val);
 
@@ -295,12 +309,17 @@ if (isset($this->request->get['order_id'])) {
     });
 
     function saveOrder() {
+
         $.ajax({
             url: 'index.php?route=extra/order/jxSaveOrder&token=<?php echo $token; ?>',
             type: 'POST',
             data: $('#extra_order_form').serialize(),
             dataType: 'json',
+            error: function (XHR) {
+                //console.log(XHR.responseText);
+            },
             success: function (json) {
+
                 $('.warning').remove();
 
                 if (json['redirect']) {
@@ -321,14 +340,21 @@ if (isset($this->request->get['order_id'])) {
     }
 
     function cancelOrder(order_id) {
+
         if (confirm("Точно отменяем?")) {
             $.ajax({
                 url: 'index.php?route=extra/helper/cancel&order_id=' + order_id + '&token=<?php echo $token; ?>',
                 type: 'GET',
                 dataType: 'json',
                 data: 'order_id=' + order_id,
-                success: function () {
-                    location.reload();
+                
+                error: function (XHR) {
+                    //console.log(XHR.responseText);
+                    location.href = location.href
+                },
+                success: function (resp) {
+                    //console.log(resp);
+                    location.href = location.href
                 }
             });
         }
@@ -339,6 +365,7 @@ if (isset($this->request->get['order_id'])) {
     });
 
     $('#button_confirm_order').click(function () {
+
         var change_status_confirm = true;
 
         var preorder = parseInt($('#extra_order_info input[name="order[preorder]"]:checked').val());
@@ -373,63 +400,18 @@ if (isset($this->request->get['order_id'])) {
     });
 
     $('input[name="customer[street]"], input[name="customer[house]"]').change(function () {
-        getDistanceNew();
+        getDistance();
     });
 
     $('input[name="bonusdata[withdraw]"]').change(function () {
         calcExtraOrder();
     });
 
-    function getDistanceNew() {
-        $('.warning').remove();
-
-        var cont = $('.newcard');
-
-        var city = cont.find('input[name="customer[city]"]').val();
-        var street = cont.find('input[name="customer[street]"]').val();
-        var house = cont.find('input[name="customer[house]"]').val();
-        var flat = cont.find('input[name="customer[flat]"]').val();
-        
-        if (city.length > 0 && street.length > 0 && house.length > 0) {
-            data = 'city=' + city + '&street=' + street + '&house=' + house;
-            if (flat.length > 0) {
-                data += '&flat=' + flat;
-            }
-
-            $.ajax({
-                url: 'index.php?route=extra/helper/getDistance&token=<?php echo $token; ?>',
-                type: 'POST',
-                data: data,
-                dataType: 'json',
-                success: function (json) {
-                    //console.log(json);
-                    $('#delivery_info').removeClass('loading');
-
-                    if (json['distance']) {
-                        //$('#distance').html(json['distance']['text']);
-                        $('[name="customer[distance]"]').val(json.distance.value); //@<<<<<<<<<<<<<<<
-                        $('#new_customer_distance').val(json.distance.text);
-
-                        d_price = getDeliveryPrice();
-
-                        //$('#delivery_price').html(d_price + 'р.');
-                        $('#new_delivery_price').val(d_price + 'р.'); //@<<<<<<<<<<<<<<<
-
-                        calcExtraOrder();
-                    }
-
-                    if (json['error']) {
-                        $('#order_buttons').before('<div class="warning">' + json['error'] + '</div>');
-                    }
-                }
-            });
-        }/* */
-    }
 
     function getDistance() {
         $('.warning').remove();
 
-        var cont = $('#extra_customer_info .delivery-info');
+        var cont = $('#clientcard');
 
         var city = cont.find('input[name="customer[city]"]').val();
         var street = cont.find('input[name="customer[street]"]').val();
@@ -453,14 +435,14 @@ if (isset($this->request->get['order_id'])) {
                     $('#delivery_info').removeClass('loading');
 
                     if (json['distance']) {
-                        $('#distance').html(json['distance']['text']);
-                        $('#xdistance').val(json['distance']['text']); //@<<<<<<<<<<<<<<<
-                        $('#delivery_info input[name="customer[distance]"]').val(json['distance']['value']);
+                        // $('#distance').html(json['distance']['text']);
+                        $('#customer_distance').val(json['distance']['text']); //@<<<<<<<<<<<<<<<
+                        $('#clientcard input[name="customer[distance]"]').val(json['distance']['value']);
 
                         d_price = getDeliveryPrice();
 
                         $('#delivery_price').html(d_price + 'р.');
-                        $('#xdelivery_price').val(d_price + 'р.'); //@<<<<<<<<<<<<<<<
+                        $('#delivery_price').val(d_price + 'р.'); //@<<<<<<<<<<<<<<<
 
                         calcExtraOrder();
                     }
