@@ -2,11 +2,14 @@
 
 class ControllerBonusclubApi extends Controller {
 
+    public $token;
+
     public function __construct($registry) {
         parent::__construct($registry);
 
         $this->load->model("setting/setting");
         $this->data["settings"] = $this->model_setting_setting->getSetting("bonusclub");
+
         if (!array_key_exists("private_key", $this->data["settings"])) {
             $this->data["settings"]["private_key"] = false;
         }
@@ -16,14 +19,17 @@ class ControllerBonusclubApi extends Controller {
         if (!array_key_exists("url", $this->data["settings"])) {
             $this->data["settings"]["url"] = false;
         }
+        
+        $this->GetToken();
     }
 
     public function check() {
-        $resp = $this->send("check", "emulate");
+        $resp = $this->send("check");
         $this->response->setOutput($resp);
     }
 
     public function GetToken() {
+        $token = $this->send("getToken");
         $this->data["token"] = $this->send("getToken");
     }
 
@@ -35,6 +41,16 @@ class ControllerBonusclubApi extends Controller {
         $this->response->setOutput(json_encode($resp));
     }
 
+    public function double($order) {
+        $data = array(
+            "account" => $order["bc_account"],
+            "fill" => $order["bc_fill"],
+            "withdraw" => $order["bc_withdraw"],
+        );
+        
+        $this->send("double", $this->data["token"], $data);
+    }
+    
     public function fill($id, $summ) {
         
     }
@@ -54,9 +70,8 @@ class ControllerBonusclubApi extends Controller {
     public function test() {
         $action = $_POST["action"];
         $public = $this->data["settings"]["public_key"];
-        $token = "emulate";
+        $token =  "emulate";
         $data = json_encode($_POST["data"]);
-
         $resp = $this->send($action, $token, $data);
         $this->response->setOutput("<pre>" . print_r($resp, true) . "</pre>");
     }
@@ -91,6 +106,7 @@ class ControllerBonusclubApi extends Controller {
     }
 
     private function send($action, $token = "", $data = "") {
+        
         $resp = false;
         $post = array();
         if (!empty($data)) {
@@ -107,16 +123,17 @@ class ControllerBonusclubApi extends Controller {
         $post[] = "action=" . $action;
         $post[] = "token=" . $token;
         $post[] = "public_key=" . $this->data["settings"]["public_key"];
-
+        
         $ch = curl_init($this->data["settings"]["url"]);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_POSTFIELDS, implode("&", $post));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $resp = curl_exec($ch);
-
-        $output = json_decode($resp, true);
+        
+        $resp = curl_exec($ch);        
         curl_close($ch);
+        
+        $output = json_decode($resp, true);
         if (!$output) {
             return $this->send($action, $token, $data);
         }

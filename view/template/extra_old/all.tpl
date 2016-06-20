@@ -1,6 +1,5 @@
 <?php echo $header; ?>
 <div id="content">
-    <?// var_dump($this->data);?>
   <?
   /*
   TODO: здесь в циклах обнуляется стоимость доставки при самовывозе, но вообще надо пофиксить, чтобы оно изначально
@@ -51,7 +50,6 @@
         </thead>
         <tbody>
           <?php if (isset($orders[CONFIRM_ORDER_STATUS_ID]) && !empty($orders[CONFIRM_ORDER_STATUS_ID])) { ?>
-            
             <?php foreach ($orders[CONFIRM_ORDER_STATUS_ID] as $order) { ?>
             <?php if (!$order['preorder']) continue; ?>
             <tr data-order-id="<?php echo $order['order_id']; ?>">
@@ -73,7 +71,7 @@
               <?php echo $order['delivery_time']; ?>
               </td>
               <td class="left">
-                 <?php echo $order['total']; ?> / <?php echo $order['special_percent']; ?> / 
+                <?php echo $order['total']; ?> / <?php echo $order['special_percent']; ?> / 
                 <?php $sum = $order['total_special'] + $order['total_diff']; ?>
                 <?php echo ($sum > FREE_DELIVERY_TOTAL) ? $sum : $sum + $order['delivery_price']; ?>
               </td>

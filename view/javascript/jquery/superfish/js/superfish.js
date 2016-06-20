@@ -71,6 +71,13 @@
 	sf.op = {};
 	sf.IE7fix = function(){
 		var o = sf.op;
+               
+                
+                if(typeof($["browser"]) == "undefined" || typeof($.browser["msie"]) == "undefined"){
+                    $.browser = {msie:false};
+                    $.browser.msie = false;
+                };
+                
 		if ($.browser.msie && $.browser.version > 6 && o.dropShadows && o.animation.opacity!=undefined)
 			this.toggleClass(sf.c.shadowClass+'-off');
 		};

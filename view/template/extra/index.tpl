@@ -135,6 +135,7 @@ echo $header;
                         <td class="left">Имя покупателя</td>
                         <td class="right">Сумма заказа</td>
                         <td class="right">Телефон</td>
+                        <td class="left">Адрес</td>
                         <td class="right">Дата подтверждения</td>
                         <td class="right">Действия</td>
                     </tr>
@@ -155,12 +156,13 @@ echo $header;
                                 <td class="right"><?php echo $order['customer_phone']; ?>
                                   <!--<a onClick="copyToClipboard('<?php echo $order['customer_phone']; ?>')" class="dotted">[ <span>копировать </span>]</a>-->
                                 </td>
+                                <td class="left"><?php echo $order["address"]; ?></td>
                                 <td class="right">
                                     <span style="font-size: 85%"><?php echo $order['confirm_date']; ?></span> <?php echo $order['confirm_time']; ?>
                                 </td>
                                 <td class="right">
                                     <a href="<?php echo $order['href_edit']; ?>">Редактировать</a> | 
-                                    <a class="dotted" onClick="cancelOrder(<?php echo $order['order_id']; ?>, this, true)"><span>Отменить</span></a>
+                                    <? /* ?><a class="dotted" onClick="cancelOrder(<?php echo $order['order_id']; ?>, this, true)"><span>Отменить</span></a><? /* */ ?>
                                 </td>
                             </tr>
     <?php } ?>
@@ -208,7 +210,7 @@ echo $header;
                                     <span style="font-size: 85%"><?php echo $order['confirm_date']; ?></span> <?php echo $order['confirm_time']; ?>
                                 </td>
                                 <td class="right">
-                                    <a class="dotted" onClick="cancelOrder(<?php echo $order['order_id']; ?>)"><span>Отменить</span></a>
+                                    <? /* ?><a class="dotted" onClick="cancelOrder(<?php echo $order['order_id']; ?>)"><span>Отменить</span></a><? /* */ ?>
                                 </td>
                             </tr>
     <?php } ?>

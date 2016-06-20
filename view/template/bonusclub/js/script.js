@@ -241,6 +241,7 @@ function emulate() {
             target.html(out);
         },
         success: function (resp) {
+            console.log(resp);
             var out = target.html() + "<br />Получаем <code class=\"alert-success\">" + resp + "</code>";
             target.html(out);
         }

@@ -58,8 +58,8 @@ class ControllerExtraOrder extends Controller {
 			}
 			
 			$order_total = $this->model_extra_order->getOrderTotal($result['order_id']);
-                            
-                        $orders[$result['status_id']][] = array(
+
+			$orders[$result['status_id']][] = array(
 				'order_id'        => $result['order_id'],
 				'date_add'        => $result['date_add'],
 				'number'          => $result['number'],
@@ -73,7 +73,6 @@ class ControllerExtraOrder extends Controller {
 				'total'           => $order_total['price'],
 				'total_special'   => $order_total['special'],
 				'total_diff'      => $result['total_diff'],
-				'address'      => $result['address'],
 				'customer_phone'  => $phone,
 				'href_edit'       => $this->url->link('extra/order/edit', 'order_id=' . $result['order_id'] . '&token=' . $this->session->data['token'])
 			);
@@ -398,7 +397,6 @@ class ControllerExtraOrder extends Controller {
 		}
 		
 		$order_info = $this->model_extra_order->getOrder($order_id);
-
 		
 		if ($order_info) {
 			$order_info['delivery_date'] = date('d.m.Y', strtotime($order_info['delivery_date']));
@@ -443,11 +441,7 @@ class ControllerExtraOrder extends Controller {
 				'delivery_time' => 0,
 				'date_confirm'  => 0,
 				'comment' => '',
-                                'bc_fill' => 0,
-                                'bc_withdraw' => 0,
-                                'bc_account' => '',
-                                'bc_phone' => '',
-                                'floor' => 1
+                'floor' => 1
 			);
 		}
 		
@@ -584,15 +578,10 @@ class ControllerExtraOrder extends Controller {
 					'comment'       => $order_data['comment'],
 					'address'       => $order_data['address'],
 					'distance'      => $customer_data['distance'],
-                                        'bc_fill'       => $this->request->post['bonus_fill'],
-                                        'bc_withdraw'   => $this->request->post['bonus_withdraw'],
-                                        'bc_account'    => $this->request->post['bonus_account'],
-                                        'bc_phone'      => $this->request->post['bonus_phone'],
-                                    
                     'floor'       => trim($order_data['floor'])
 				);
 				
-				$result = $this->model_extra_order->updateOrder($order);
+				$this->model_extra_order->updateOrder($order);
 				
 				$order_id = $order['order_id'];
 			} else {
@@ -616,10 +605,6 @@ class ControllerExtraOrder extends Controller {
 					'total_diff'    => 0,
 					'address'       => $order_data['address'],
 					'distance'      => $customer_data['distance'],
-                                        'bc_fill'       => $this->request->post['bonus_fill'],
-                                        'bc_withdraw'   => $this->request->post['bonus_withdraw'],
-                                        'bc_account'    => $this->request->post['bonus_account'],
-                                        'bc_phone'      => $this->request->post['bonus_phone'],
                     'floor'       => trim($order_data['floor'])
 				);
 				// ниже бэкап, js не всегда отрабатывал получение даты
@@ -662,7 +647,6 @@ class ControllerExtraOrder extends Controller {
 			}
 			
 			$json['redirect'] = html_entity_decode($this->url->link($route, $url));
-			//$json['data'] = $result;
 		}
 		
 		if ($this->errors) {

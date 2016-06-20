@@ -29,10 +29,13 @@ require_once(DIR_SYSTEM . 'library/currency.php');
 require_once(DIR_SYSTEM . 'library/user.php');
 require_once(DIR_SYSTEM . 'library/weight.php');
 require_once(DIR_SYSTEM . 'library/length.php');
+
+
+/*
 require_once(DIR_SYSTEM . 'library/BCAPI/BCClient.class.php');
 
 require_once(DIR_SYSTEM . 'library/BCAPI/BCClient.class.php');
-$BCCLI = new BCClient();
+$BCCLI = new BCClient();/* */
 
 //require_once(DIR_SYSTEM . 'library/BonusClubClient.php');
 //Client

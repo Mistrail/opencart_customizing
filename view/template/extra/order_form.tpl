@@ -1,4 +1,5 @@
 <?php echo $header; ?>
+
 <div id="content">
     <form id="extra_order_form" action="" method="POST">
         <div class="box">
@@ -58,7 +59,8 @@
 </div>
 <script type="text/javascript">
     function getDeliveryPrice() {
-        var m = parseFloat($('#delivery_info input[name="customer[distance]"]').val());
+        var m = parseFloat($('#clientcard input[name="customer[distance]"]').val());
+        //console.log(m);
         //m *= 1000;
         if (m < 6000) {
             return 100;
@@ -83,12 +85,12 @@
         total = 0;
         total_special = 0;
 
-        var fieldWithdraw = "";
+        var fieldWithdraw = $(".eo-order-withdraw");
         var inputWithdraw = $("[name=bonus_withdraw]");
         var inputFill = $("[name=bonus_fill]");
 
         var fill = 0;
-        var withdraw = 0;
+        var withdraw = inputWithdraw.val() * 1;
         var deltaTotal = 0;
 
         $('#extra_order_cart tbody tr').each(function () {
@@ -104,6 +106,7 @@
             bonusFilled = price * quantity * (special_percent ? 0.01 : 0.02);
             delta = bonusFilled - Math.floor(bonusFilled);
             bonusField.html(Math.floor(bonusFilled));
+            
             deltaTotal += delta;
             fill += Math.floor(bonusFilled);
 
@@ -152,9 +155,11 @@
         order_info.find('.eo-order-total_special').html(total_special);
         order_info.find('.eo-order-special_percent').html(special_percent);
         order_info.find('.eo-order-delivery').html(delivery_price);
-        order_info.find('.eo-order-total').html(total_special + delivery_price);
+        order_info.find('.eo-order-total').html(total_special + delivery_price - withdraw);
 
+        fieldWithdraw.html(withdraw);
         inputFill.val(fill);
+        $("#bonusDelta").val(deltaTotal);
     }
 
 
@@ -278,6 +283,7 @@
 
         if (!isValidDate(delivery_date)) {
             alert('Укажите дату в формате ДД.ММ.ГГГГ');
+            searchAccount();
             return;
         }
 
@@ -319,7 +325,7 @@ if (isset($this->request->get['order_id'])) {
                 //console.log(XHR.responseText);
             },
             success: function (json) {
-
+                //console.log(json);
                 $('.warning').remove();
 
                 if (json['redirect']) {
@@ -335,7 +341,7 @@ if (isset($this->request->get['order_id'])) {
 
                     $('#order_buttons').before('<div class="warning">' + err_html + '</div>');
                 }
-            }
+            }/* */
         });
     }
 
@@ -347,7 +353,6 @@ if (isset($this->request->get['order_id'])) {
                 type: 'GET',
                 dataType: 'json',
                 data: 'order_id=' + order_id,
-                
                 error: function (XHR) {
                     //console.log(XHR.responseText);
                     location.href = location.href
@@ -364,6 +369,65 @@ if (isset($this->request->get['order_id'])) {
         saveOrder();
     });
 
+
+    $("[name=bonus_phone]").change(function () {
+        searchAccount();
+    });
+    $("[name=bonus_account]").change(function () {
+        searchAccount();
+    });
+    $("[name=bonus_phone]").focus(function () {
+        $("[name=bonus_account]").val("");
+        $("[name=bonus_balance]").val(0);
+    });
+    $("[name=bonus_account]").focus(function () {
+        $("[name=bonus_phone]").val("");
+        $("[name=bonus_balance]").val(0);
+    });
+
+    $("#bonus_search").click(function () {
+        searchAccount();
+        return false;
+    });
+
+    function searchAccount() {
+        var phone = $("[name=bonus_phone]").val();
+        var account = $("[name=bonus_account]").val();
+        var token = "<?= $this->session->data["token"] ?>";
+        var url = "/admin/index.php?route=bonusclub/api/getaccount&token=" + token;
+
+
+        var search = {};
+        if (account) {
+            search = {
+                field: "account",
+                value: account
+            };
+        } else if (phone) {
+            search = {
+                field: "phone",
+                value: phone
+            };
+        }
+
+        var ajax = {
+            url: url,
+            data: search,
+            type: "post",
+            dataType: "json",
+            success: function (resp) {
+                if (resp) {
+                    $("[name=bonus_phone]").val(resp.phone);
+                    $("[name=bonus_account]").val(resp.account);
+                    $("[name=bonus_balance]").val(resp.balance);
+                }
+            }
+        }
+
+        $.ajax(ajax);
+
+    }
+
     $('#button_confirm_order').click(function () {
 
         var change_status_confirm = true;
@@ -376,6 +440,7 @@ if (isset($this->request->get['order_id'])) {
 
             if (preorder_time.length <= 1) {
                 alert('Укажите время предзаказа');
+                searchAccount();
                 return;
             }
 
@@ -399,13 +464,25 @@ if (isset($this->request->get['order_id'])) {
         getDistance();
     });
 
-    $('input[name="customer[street]"], input[name="customer[house]"]').change(function () {
+    $('input[name="customer[street]"], input[name="customer[house]"], input[name="customer[city]"]').change(function () {
         getDistance();
     });
 
-    $('input[name="bonusdata[withdraw]"]').change(function () {
+
+    $("[name=bonus_withdraw]").change(function () {
+        var value = $(this).val();
+        var max = $("[name=bonus_balance]").val() * 1;
+        var total = $(".eo-order-total_price").html() * 1;
+        if (value <= max) {
+            if (value > total) {
+                $(this).val(total);
+            }
+        } else {
+            $(this).val(max);
+        }
+
         calcExtraOrder();
-    });
+    })
 
 
     function getDistance() {
@@ -413,7 +490,7 @@ if (isset($this->request->get['order_id'])) {
 
         var cont = $('#clientcard');
 
-        var city = cont.find('input[name="customer[city]"]').val();
+        var city = cont.find('[name="customer[city]"]').val();
         var street = cont.find('input[name="customer[street]"]').val();
         var house = cont.find('input[name="customer[house]"]').val();
         var flat = cont.find('input[name="customer[flat]"]').val();
@@ -424,7 +501,7 @@ if (isset($this->request->get['order_id'])) {
                 data += '&flat=' + flat;
             }
 
-            $('#delivery_info').addClass('loading');
+            //$('#delivery_info').addClass('loading');
 
             $.ajax({
                 url: 'index.php?route=extra/helper/getDistance&token=<?php echo $token; ?>',
@@ -432,7 +509,7 @@ if (isset($this->request->get['order_id'])) {
                 data: data,
                 dataType: 'json',
                 success: function (json) {
-                    $('#delivery_info').removeClass('loading');
+                    //$('#delivery_info').removeClass('loading');
 
                     if (json['distance']) {
                         // $('#distance').html(json['distance']['text']);
@@ -441,7 +518,7 @@ if (isset($this->request->get['order_id'])) {
 
                         d_price = getDeliveryPrice();
 
-                        $('#delivery_price').html(d_price + 'р.');
+                        //$('#delivery_price').html(d_price + 'р.');
                         $('#delivery_price').val(d_price + 'р.'); //@<<<<<<<<<<<<<<<
 
                         calcExtraOrder();
@@ -456,9 +533,24 @@ if (isset($this->request->get['order_id'])) {
     }
 
     $(document).ready(function () {
+        var token = "<?= $token; ?>";
+        var url = "/admin/index.php?route=bonusclub/api/check&token=" + token;
+        
+        $.ajax({
+            url: url,
+            type: "post",
+            success: function (resp) {
+                //console.log(resp);
+                if (resp == "ok") {
+                    $("#serverStatus").html("Сервер онлайн");
+                    $("#serverStatus").css("color", "#090");
+                    searchAccount();
+                }
+            }
+        });
+
         $('#preorder_input input').trigger('change');
         $('#preorder_date input[name="order[delivery_date]"]').trigger('change');
-
         getDistance();
 
         $('#extra_order_info input[name="order[biglion]"]').change(function () {

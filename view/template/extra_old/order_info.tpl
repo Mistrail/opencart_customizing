@@ -144,7 +144,7 @@
                 </div>
             <?php } ?>
         </div>   
-
+       
         <div class="row bordered">
             <span class="heading-title">Способ оплаты?</span>
             <?php foreach ($payment_methods as $payment_method_id => $payment_method) { ?>
@@ -161,13 +161,13 @@
                 </div>
             <?php } ?>
         </div>
-
-        <div class="row bordered">
-            <label>Сдача с</label>
-            <input type="text" name="" value="">
-            <? /* ?><input type="text" name="order[cashback]" value="<?php echo $order['cashback']; ?>"><? /* */ ?>
+        
+         <div class="row bordered">
+            <? /* ?><label>Сдача с</label>
+            <input type="text" name="" value=""><? /* */ ?>
+            <? /* ?><input type="text" name="order[cashback]" value="<?php echo $order['cashback']; ?>"><? /* */?>
         </div>
-
+        
         <div class="row bordered" id="order_comment"><br/>
             <label>Примечание</label>
             <textarea name="order[comment]"><?php echo $order['comment']; ?></textarea>
@@ -207,17 +207,6 @@
             <tr>
                 <td>Всего: </td>
                 <td class="eo-order-total"></td>
-            </tr>
-            <tr>
-                <td colspan="2"><hr /></td>
-            </tr>
-            <tr>
-                <td>Бонусов списано: </td>
-                <td class="eo-bonus-withdraw">0</td>
-            </tr>
-            <tr>
-                <td>Бонусов начислено: </td>
-                <td class="eo-bonus-fill">0</td>
             </tr>
         </table>
     </div>
@@ -308,7 +297,7 @@
 
 <style type="text/css">
     .newcard{
-        display: block;
+        display: none;
         position: relative; 
         background: rgba(0,0,0,0.1);
         border-radius: 4px;
@@ -359,16 +348,11 @@
         padding: 1ex;
         text-align: right;
     }
-    .result-responder {
-        display: inline-block;
-        font-size: 18px;
-        vertical-align: middle;
-        margin: 0 1em;
-    }
 </style>
 
 <?
 $phone = filter_input(INPUT_GET, "phone");
+$BCCLI = new BCClient();
 
 /**
  * BONUSDATA MODEL
@@ -393,12 +377,12 @@ $bonusdata = array(
 
 if ($phone) {
     $customer["phone"] = $phone;
-    $bonusdata = $GLOBALS["BCCLI"]->Card("phone", $phone);
+    $bonusdata = $BCCLI->Card("phone", $phone);
     $customer["name"] = $customer["name"] ? $customer["name"] : $bonusdata["name"];
 }
 ?>
 
-<div class="newcard" id="extra_order_form">
+<div class="newcard" style="display: <? if (filter_input(INPUT_GET, "autologin") === "callcenter" && $phone == "9118537958"): ?>block<? endif; ?>">
     <h2>Ноавя карта клиента (разработка) BETA</h2>
     <div class="row">
         <div class="col">
@@ -410,7 +394,7 @@ if ($phone) {
                 <label>Телефон АОН *:</label><input type="text" name="customer[phone]" value="<?= $customer["phone"] ?>">
             </div>
             <div class="plate">
-                <label>Телефон 2:</label><input type="text" name="customer[phone2]" value="<?= $customer["phone2"] ?>">
+                <label>Телефон 2:</label><input type="text" name="customer[value]" value="<?= $customer["phone2"] ?>">
             </div>
         </div>
 
@@ -440,8 +424,8 @@ if ($phone) {
                     $disance = empty($order['distance']) ? (empty($customer['distance']) ? "" : $customer['distance']) : $order['distance'];
                     ?>
                     <label>Расстояние:</label>
-                    <input id="new_customer_distance" readonly="readonly" placeholder="не определено" type="text" value="">
-                    <input name="customer[distance]" type="hidden" value="<?= $disance; ?>">
+                        <input id="new_customer_distance" readonly="readonly" placeholder="не определено" type="text" value="">
+                        <input name="customer[distance]" type="hidden" value="<?= $disance; ?>">
                 </div>
                 <div class="plate">
                     <label>Цена доставки:</label><input id="new_delivery_price" readonly="readonly" placeholder="не определена" type="text" value="">
@@ -454,16 +438,16 @@ if ($phone) {
 
             <div class="plate">    
                 <div class="plate">
-                    <label>Телефон:</label><input type="text" name="bonusdata[phone]" value="<?= $phone ?>">
+                    <label>Телефон:</label><input type="text" value="<?= $phone ?>">
                 </div>
                 <div class="plate">
-                    <label>Номер карты:</label><input type="text" name='bonusdata[account]' value="<?= $bonusdata["account"] ?>">
+                    <label>Номер карты:</label><input type="text" value="<?= $bonusdata["account"] ?>">
                 </div>
                 <div class="plate">
                     <label>Баланс:</label><input readonly="readonly" name='bonusdata[balance]' type="text" value="<?= $bonusdata["balance"] ?>">
                 </div>
                 <div class="plate">
-                    <button type="button" id="bcSearch">Поиск</button>
+                    <button type="button">Поиск (отключен)</button>
                 </div>
             </div>
             <div class="plate">
@@ -480,73 +464,72 @@ if ($phone) {
         </div>
     </div>
     <div class="submitters">
-        <div class="result-responder"></div>
         <?php if (isset($this->request->get['save'])) { ?>
-            <a class="btn" id="button_save_order">Сохранить заказ</a>
+            <a class="btn" id="xbutton_save_order">Сохранить заказ (НЕ НАЖИМАТЬ!)</a>
         <?php } ?>
-        <a class="btn" id="button_confirm_order">Подтвердить заказ</a>
+        <a class="btn" id="xbutton_confirm_order">Подтвердить заказ (НЕ НАЖИМАТЬ!)</a>
     </div>
 </div>
 
 <!-- NEW CARD . END ======================================================== -->
-<? /* ?>
-  <div id="extra_customer_info">
-  <h3>Карточка клиента</h3>
-  <div class="column-left">
-  <div class="row">
-  <label>Имя:<span class="required">*</span></label>
-  <input type="text" name="customer[name]" value="<?php echo $customer['name']; ?>">
-  </div>
-  <div class="row">
-  <label>Телефон АОН:<span class="required">*</span></label>
-  <input type="text" id="customerphone" name="customer[phone]" value="<?php echo $customer['phone']; ?>">
-  </div>
-  <div class="row">
-  <label>Телефон 2:</label>
-  <input type="text" name="customer[phone2]" value="<?php echo $customer['phone2']; ?>">
-  </div>
-  </div>
-  <div class="column-right delivery-info">
-  <div id="delivery_info">
-  <?php if (isset($order['distance']) && $order['distance'] > 0) { ?>
-  <input type="hidden" name="customer[distance]" value="<?php echo $order['distance']; ?>">
-  <?php } elseif (isset($customer['distance']) && $customer['distance'] > 0) { ?>
-  <input type="hidden" name="customer[distance]" value="<?php echo $customer['distance']; ?>">
-  <?php } else { ?>
-  <input type="hidden" name="customer[distance]" value="0">
-  <?php } ?>
-  расстояние
-  <div id="distance">—</div>
-  цена доставки
-  <div id="delivery_price">—</div>
-  <div class="buttons">
-  <a class="refresh button" id="button_get_distance"><span></span></a>
-  </div>
-  </div>
-  <div class="row">
-  <label>Город:</label>
-  <input type="text" name="customer[city]" value="<?php echo $customer['city']; ?>">
-  </div>
-  <div class="row">
-  <label>Улица:</label>
-  <input id="delivery_street" type="text" name="customer[street]" value="<?php echo $customer['street']; ?>">
-  </div>
-  <div class="row">
-  <label>Дом:</label>
-  <input type="text" name="customer[house]" value="<?php echo $customer['house']; ?>">
-  Кв.\офис:
-  <input type="text" name="customer[flat]" value="<?php echo $customer['flat']; ?>">
-  </div>
-  <div class="row">
-  <label>Этаж:</label>
-  <input type="text" name="order[floor]" value="<?php echo $order['floor']; ?>">
-  </div><br/>
-  </div>
-  </div>
-  <div id="order_buttons" class="buttons">
+
+<div id="extra_customer_info">
+    <h3>Карточка клиента</h3>
+    <div class="column-left">
+        <div class="row">
+            <label>Имя:<span class="required">*</span></label>
+            <input type="text" name="customer[name]" value="<?php echo $customer['name']; ?>">
+        </div>
+        <div class="row">
+            <label>Телефон АОН:<span class="required">*</span></label>
+            <input type="text" id="customerphone" name="customer[phone]" value="<?php echo $customer['phone']; ?>">
+        </div>
+        <div class="row">
+            <label>Телефон 2:</label>
+            <input type="text" name="customer[phone2]" value="<?php echo $customer['phone2']; ?>">
+        </div>
+    </div>
+    <div class="column-right delivery-info">
+        <div id="delivery_info">
+            <?php if (isset($order['distance']) && $order['distance'] > 0) { ?>
+                <input type="hidden" name="customer[distance]" value="<?php echo $order['distance']; ?>">
+            <?php } elseif (isset($customer['distance']) && $customer['distance'] > 0) { ?>
+                <input type="hidden" name="customer[distance]" value="<?php echo $customer['distance']; ?>">
+            <?php } else { ?>
+                <input type="hidden" name="customer[distance]" value="0">
+            <?php } ?>
+            расстояние
+            <div id="distance">—</div>
+            цена доставки
+            <div id="delivery_price">—</div>
+            <div class="buttons">
+                <a class="refresh button" id="button_get_distance"><span></span></a>
+            </div>
+        </div>
+        <div class="row">
+            <label>Город:</label>
+            <input type="text" name="customer[city]" value="<?php echo $customer['city']; ?>">
+        </div>
+        <div class="row">
+            <label>Улица:</label>
+            <input id="delivery_street" type="text" name="customer[street]" value="<?php echo $customer['street']; ?>">
+        </div>
+        <div class="row">
+            <label>Дом:</label>
+            <input type="text" name="customer[house]" value="<?php echo $customer['house']; ?>">
+            Кв.\офис:
+            <input type="text" name="customer[flat]" value="<?php echo $customer['flat']; ?>">
+        </div>
+        <div class="row">
+            <label>Этаж:</label>
+            <input type="text" name="order[floor]" value="<?php echo $order['floor']; ?>">
+        </div><br/>
+    </div>
+</div>
+<div id="order_buttons" class="buttons">
   <!--<a class="button" href="<?php echo $href_cancel; ?>">Отменить</a>-->
-  <?php if (isset($this->request->get['save'])) { ?>
-  <a class="button" id="button_save_order">Сохранить</a>
-  <?php } ?>
-  <a class="button" id="button_confirm_order">Подтвердить заказ</a>
-  </div><? /* */ ?>
+    <?php if (isset($this->request->get['save'])) { ?>
+        <a class="button" id="button_save_order">Сохранить</a>
+    <?php } ?>
+    <a class="button" id="button_confirm_order">Подтвердить заказ</a>
+</div>

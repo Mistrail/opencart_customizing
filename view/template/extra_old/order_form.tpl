@@ -56,63 +56,10 @@
         </div>
     </form>
 </div>
-<?= $GLOBALS["BCCLI"]->GetJSToken() ?>
 <script type="text/javascript">
-    $('[name="bonusdata[phone]"]').keydown(function(){
-        $('[name="bonusdata[account]"]').val("");
-        $('[name="bonusdata[balance]"]').val("");
-    });
-    
-    $('[name="bonusdata[account]"]').keydown(function(){
-        $('[name="bonusdata[phone]"]').val("");
-        $('[name="bonusdata[balance]"]').val("");
-    });
-    
-    $("#bcSearch").click(function () {
-        var phone = $('[name="bonusdata[phone]"]').val();
-        var account = $('[name="bonusdata[account]"]').val();
-        var field = account ? "account" : "phone";
-        var val = account ? account : phone;
-
-        var data = {
-            field: field,
-            value: val
-        };
-
-        var send = btoa(JSON.stringify(data));
-        $.ajax({
-            url: BCCLI.url,
-            crossdomain: true,
-            data: {
-                action: "JSGetCard",
-                token: BCCLI.token,
-                data: send
-            },
-            dataType: "text",
-            type: "post",
-            success: function (resp) {
-                resp = resp.split(/\n/);
-                resp = resp.join("");
-                resp = atob(resp);
-                resp = JSON.parse(resp);
-                
-                $('[name="bonusdata[phone]"]').val("");
-                $('[name="bonusdata[account]"]').val("");
-                $('[name="bonusdata[balance]"]').val("");
-
-                $('[name="bonusdata[phone]"]').val(resp.phone);
-                $('[name="bonusdata[account]"]').val(resp.account);
-                $('[name="bonusdata[balance]"]').val(resp.balance);
-            },
-            error: function (XHR) {
-
-            }
-        })
-    })
-
     function getDeliveryPrice() {
-        var m = parseFloat($('input[name="customer[distance]"]').val());
-        //m *= 1000;
+        var m = parseFloat($('#delivery_info input[name="customer[distance]"]').val());
+            //m *= 1000;
         if (m < 6000) {
             return 100;
         } else if (m < 10300) {
@@ -184,19 +131,16 @@
             var fullFill = total * 0.05;
             fill = Math.floor(fullFill);
 
-            
-            //$("[name='bonusdata[fill]']").val(fill);
-            //$("[name='bonusdata[delta]']").val(fullFill - fill);
+            total_special = total_special - withdraw;
+            $("[name='bonusdata[fill]']").val(fill);
+            $("[name='bonusdata[delta]']").val(fullFill - fill);
 
             special_percent = ((total - total_special) / (total / 100)).toFixed(1);
-            //total_special = total_special - withdraw;
         } else {
             special_percent = 0;
         }
 
         order_info = $('#extra_total_info');
-        order_info.find('.eo-bonus-fill').html(fill);
-        order_info.find('.eo-bonus-withdraw').html(withdraw);
         order_info.find('.eo-order-total_price').html(total);
         order_info.find('.eo-order-total_special').html(total_special);
         order_info.find('.eo-order-special_percent').html(special_percent);
@@ -350,25 +294,17 @@ if (isset($this->request->get['order_id'])) {
         });
     });
 
-    function saveOrder() {  
-    
+    function saveOrder() {
         $.ajax({
             url: 'index.php?route=extra/order/jxSaveOrder&token=<?php echo $token; ?>',
             type: 'POST',
             data: $('#extra_order_form').serialize(),
             dataType: 'json',
-            error: function (XHR) {
-                $(".result-responder").empty().html(XHR.responceText);
-            },
             success: function (json) {
-                
                 $('.warning').remove();
 
                 if (json['redirect']) {
-                    var str = json.action == "addOrder" ? "Новый заказ" : "Заказ";
-                    str += " " + json.response + "<br />";
-                    $(".result-responder").empty().html(str);
-                    window.location = json.redirect;
+                    window.location = json['redirect'];
                 }
 
                 if (json['errors']) {
@@ -433,7 +369,7 @@ if (isset($this->request->get['order_id'])) {
     });
 
     $('#button_get_distance').click(function () {
-        //getDistance();
+        getDistance();
     });
 
     $('input[name="customer[street]"], input[name="customer[house]"]').change(function () {
@@ -453,7 +389,7 @@ if (isset($this->request->get['order_id'])) {
         var street = cont.find('input[name="customer[street]"]').val();
         var house = cont.find('input[name="customer[house]"]').val();
         var flat = cont.find('input[name="customer[flat]"]').val();
-
+        
         if (city.length > 0 && street.length > 0 && house.length > 0) {
             data = 'city=' + city + '&street=' + street + '&house=' + house;
             if (flat.length > 0) {
@@ -466,7 +402,7 @@ if (isset($this->request->get['order_id'])) {
                 data: data,
                 dataType: 'json',
                 success: function (json) {
-
+                    //console.log(json);
                     $('#delivery_info').removeClass('loading');
 
                     if (json['distance']) {
@@ -488,7 +424,6 @@ if (isset($this->request->get['order_id'])) {
                 }
             });
         }/* */
-         calcExtraOrder();
     }
 
     function getDistance() {
@@ -541,9 +476,8 @@ if (isset($this->request->get['order_id'])) {
     $(document).ready(function () {
         $('#preorder_input input').trigger('change');
         $('#preorder_date input[name="order[delivery_date]"]').trigger('change');
-        $('input[name="customer[street]"]').trigger('change');
 
-        //getDistanceNew();
+        getDistance();
 
         $('#extra_order_info input[name="order[biglion]"]').change(function () {
             if ($(this).is(':checked')) {

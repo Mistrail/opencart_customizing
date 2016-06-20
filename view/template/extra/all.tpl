@@ -162,6 +162,9 @@
                 <!--[<a href="<?php echo $order['href_change_status']; ?>">Подтвердить</a>]-->
                 [<a href="<?php echo $order['href_edit']; ?>">Редактировать</a>]
                 [<a onClick="setOrderPrepare(<?php echo $order['order_id']; ?>)">В доставку</a>]
+                <div>
+                <a style="color: red; float: left" onClick="cancelOrder(<?php echo $order['order_id']; ?>)">[<span>Отменить</span>]</a>
+                </div>
               </td>
             </tr>
             <?php } ?>
